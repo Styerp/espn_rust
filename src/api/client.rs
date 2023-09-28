@@ -37,4 +37,11 @@ impl<'a> EspnClient<'a> {
             base_url: ESPN_FF_BASE_URL,
         }
     }
+
+    pub fn main_api_string(&self, season: i32) -> String {
+        format!(
+            "{}/{}/segments/0/leagues/{}",
+            self.base_url, season, self.league_id
+        )
+    }
 }

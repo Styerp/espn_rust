@@ -1,2 +1,3 @@
 pub mod client;
-pub mod league_data;
+pub mod league;
+pub mod week;

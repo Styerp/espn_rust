@@ -7,6 +7,6 @@ static ESPN_S2: &str = "AEAE3uggnFrxe%2Fulf%2FN3Y5DZpkDwrPnG2zpRTd3z3m%2B7YJ2Fmu
 #[tokio::main]
 async fn main() {
     let client = EspnClient::build(SWID, ESPN_S2, LEAGUE_ID);
-    let data = client.get_league_settings(SEASON_ID).await;
+    let data = client.get_matchups_for_week(SEASON_ID, 3, 3).await;
     dbg!(data);
 }

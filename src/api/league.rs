@@ -1,31 +1,5 @@
-use crate::api::client::EspnClient;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-
-impl<'a> EspnClient<'a> {
-    pub async fn get_league_data(self, season: i32) -> LeagueInfoResponse {
-        let req = self.client.get(format!(
-            "{}/{}/segments/0/leagues/{}",
-            &self.base_url, season, &self.league_id
-        ));
-        let res = req.send().await.expect("LeagueInfoResponse");
-        let data = res.json::<LeagueInfoResponse>().await.expect("LeagueInfoResponse Deserialization");
-        data
-    }
-
-    pub async fn get_league_settings(self, season: i16) -> LeagueSettingsResponse {
-        let req = self
-            .client
-            .get(format!(
-                "{}/{}/segments/0/leagues/{}",
-                &self.base_url, season, &self.league_id
-            ))
-            .query(&[("view", "mSettings")]);
-        let res = req.send().await.expect("LeagueSettingsResponse");
-        let data = res.json::<LeagueSettingsResponse>().await.expect("LeagueSettingsResponse Deserialization");
-        data
-    }
-}
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct LeagueInfoResponse {
@@ -90,7 +64,7 @@ pub struct LeagueSettingsResponse {
     pub settings: LeagueSettings,
     pub status: LeagueSettingsStatus,
 }
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Deserialize, Debug, Serialize, Copy, Clone)]
 pub struct DraftDetail {
     pub drafted: bool,
     #[serde(rename = "inProgress")]

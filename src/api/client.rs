@@ -1,3 +1,5 @@
+use crate::api::league::*;
+use crate::api::matchup::*;
 use reqwest::{
     cookie::Jar,
     header::{HeaderMap, COOKIE},
@@ -16,14 +18,13 @@ impl<'a> EspnClient<'a> {
         let mut headers = HeaderMap::new();
         headers.insert(COOKIE, format!("SWID={swid}").parse().unwrap());
         headers.insert(COOKIE, format!("espn_s2={espn_s2}").parse().unwrap());
-        let cookie_store: Jar = Jar::default();
+        let cookie_store = Jar::default();
         cookie_store.add_cookie_str(
             format!("SWID={swid}; espn_s2={espn_s2}").as_str(),
             &ESPN_FF_BASE_URL.parse().unwrap(),
         );
         let client_builder = Client::builder()
             .default_headers(headers.clone())
-            .connection_verbose(true)
             .cookie_store(true)
             .cookie_provider(cookie_store.into())
             .build();
@@ -43,5 +44,81 @@ impl<'a> EspnClient<'a> {
             "{}/{}/segments/0/leagues/{}",
             self.base_url, season, self.league_id
         )
+    }
+
+    pub async fn get_league_data(self, season: i32) -> LeagueInfoResponse {
+        let req = self.client.get(format!(
+            "{}/{}/segments/0/leagues/{}",
+            &self.base_url, season, &self.league_id
+        ));
+        let res = req.send().await.expect("LeagueInfoResponse");
+        let data = res
+            .json::<LeagueInfoResponse>()
+            .await
+            .expect("LeagueInfoResponse Deserialization");
+        data
+    }
+
+    pub async fn get_league_settings(self, season: i16) -> LeagueSettingsResponse {
+        let req = self
+            .client
+            .get(format!(
+                "{}/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[("view", "mSettings")]);
+        let res = req.send().await.expect("LeagueSettingsResponse");
+        let data = res
+            .json::<LeagueSettingsResponse>()
+            .await
+            .expect("LeagueSettingsResponse Deserialization");
+        data
+    }
+
+    pub async fn get_matchups(self, season: i16) -> MatchupResponse {
+        let req = self
+            .client
+            .get(format!(
+                "{}/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[("view", "mMatchup")]);
+        let res = req.send().await.expect("LeagueSettingsResponse");
+        let data = res
+            .json::<MatchupResponse>()
+            .await
+            .expect("MatchupResponse Deserialization");
+        data
+    }
+
+    pub async fn get_matchups_for_week(
+        self,
+        season: i16,
+        matchup_period_id: u8,
+        scoring_period_id: u8,
+    ) -> Vec<Matchup> {
+        let req = self
+            .client
+            .get(format!(
+                "{}/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[
+                ("view", "mMatchup"),      //adds the `schedule` field
+                ("view", "mMatchupScore"), //adds rosters to the teams for the current scoring period
+                ("scoringPeriodId", scoring_period_id.to_string().as_str()), //required for rosters
+            ]);
+        let res = req.send().await.expect("LeagueSettingsResponse");
+        let data = res
+            .json::<MatchupResponse>()
+            .await
+            .expect("MatchupResponse Deserialization");
+        let matchups = data
+            .schedule
+            .iter()
+            .filter(|x| x.matchup_period_id == matchup_period_id)
+            .map(|x| x.to_owned())
+            .collect::<Vec<_>>();
+        matchups
     }
 }

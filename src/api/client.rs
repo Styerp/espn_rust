@@ -1,20 +1,21 @@
+use super::matchup::{Matchup, MatchupResponse};
+use super::team::TeamResponse;
 use crate::api::league::*;
-use crate::api::matchup::*;
 use reqwest::{
     cookie::Jar,
     header::{HeaderMap, COOKIE},
     Client,
 };
-const ESPN_FF_BASE_URL: &str = "https://fantasy.espn.com/apis/v3/games/ffl/seasons";
+const ESPN_FF_BASE_URL: &str = "https://fantasy.espn.com/apis/v3/games/ffl";
 
-pub struct EspnClient<'a> {
+pub struct EspnClient {
     pub client: Client,
     pub league_id: i32,
-    pub base_url: &'a str,
+    pub base_url: &'static str,
 }
 
-impl<'a> EspnClient<'a> {
-    pub fn build(swid: &str, espn_s2: &str, league_id: i32) -> EspnClient<'a> {
+impl EspnClient {
+    pub fn build(swid: &str, espn_s2: &str, league_id: i32) -> EspnClient {
         let mut headers = HeaderMap::new();
         headers.insert(COOKIE, format!("SWID={swid}").parse().unwrap());
         headers.insert(COOKIE, format!("espn_s2={espn_s2}").parse().unwrap());
@@ -39,16 +40,16 @@ impl<'a> EspnClient<'a> {
         }
     }
 
-    pub fn main_api_string(&self, season: i32) -> String {
+    pub fn main_api_string(&self, season: i16) -> String {
         format!(
             "{}/{}/segments/0/leagues/{}",
             self.base_url, season, self.league_id
         )
     }
 
-    pub async fn get_league_data(self, season: i32) -> LeagueInfoResponse {
+    pub async fn get_league_data(self, season: i16) -> LeagueInfoResponse {
         let req = self.client.get(format!(
-            "{}/{}/segments/0/leagues/{}",
+            "{}/seasons/{}/segments/0/leagues/{}",
             &self.base_url, season, &self.league_id
         ));
         let res = req.send().await.expect("LeagueInfoResponse");
@@ -63,7 +64,7 @@ impl<'a> EspnClient<'a> {
         let req = self
             .client
             .get(format!(
-                "{}/{}/segments/0/leagues/{}",
+                "{}/seasons/{}/segments/0/leagues/{}",
                 &self.base_url, season, &self.league_id
             ))
             .query(&[("view", "mSettings")]);
@@ -75,11 +76,28 @@ impl<'a> EspnClient<'a> {
         data
     }
 
+    pub async fn get_team_data(self, season: i16) -> TeamResponse {
+        let req = self
+            .client
+            .get(format!(
+                "{}/seasons/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[("view", "mTeam")]);
+        let res = req.send().await.expect("Team ");
+
+        let data = res
+            .json::<TeamResponse>()
+            .await
+            .expect("TeamResponse Deserialization");
+        data
+    }
+
     pub async fn get_matchups(self, season: i16) -> MatchupResponse {
         let req = self
             .client
             .get(format!(
-                "{}/{}/segments/0/leagues/{}",
+                "{}/seasons/{}/segments/0/leagues/{}",
                 &self.base_url, season, &self.league_id
             ))
             .query(&[("view", "mMatchup")]);
@@ -100,7 +118,7 @@ impl<'a> EspnClient<'a> {
         let req = self
             .client
             .get(format!(
-                "{}/{}/segments/0/leagues/{}",
+                "{}/seasons/{}/segments/0/leagues/{}",
                 &self.base_url, season, &self.league_id
             ))
             .query(&[
@@ -121,4 +139,32 @@ impl<'a> EspnClient<'a> {
             .collect::<Vec<_>>();
         matchups
     }
+
+    // pub async fn get_historical_scoreboard_for_week(
+    //     self,
+    //     season: i16,
+    //     matchup_period_id: u8,
+    //     scoring_period_id: u8,
+    // ) -> Vec<Matchup> {
+    //     let req = self
+    //         .client
+    //         .get(format!(
+    //             "{}/leagueHistory/{}",
+    //             &self.base_url, &self.league_id
+    //         ))
+    //         .query(&[
+    //             ("scoringPeriodId", scoring_period_id.to_string().as_str()),
+    //             ("seasonId", season.to_string().as_str()),
+    //             ("view", "mMatchupScore"),
+    //             ("view", "mScoreboard"),
+    //             //("view", "mSettings"),
+    //             ("view", "mTopPerformers"),
+    //             //("view", "mTeam"),
+    //         ]);
+    //     let res = req.send().await.expect("Historic Data");
+    //     let data = res.json::<Vec<MatchupResponse>>().await.expect("JSON");
+    //     data.get(0).unwrap().schedule.iter().filter(
+    //         |x| x.matchup_period_id == matchup_period_id
+    //     ).map(|x| x.to_owned()).collect::<Vec<_>>()
+    // }
 }

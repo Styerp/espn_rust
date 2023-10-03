@@ -1,18 +1,4 @@
-use crate::api::client::EspnClient;
 use serde::{Deserialize, Serialize};
-
-impl<'a> EspnClient<'a> {
-    pub async fn get_box_score_for_week(self, season: i32, week: i8) {
-        let request = self.client.get(self.main_api_string(season)).query(&[
-            ("?view", "mMatchup"),
-            ("view", "mMatchupScore"),
-            ("scoringPeriodId", week.to_string().as_str()),
-        ]);
-
-        let resp = request.send().await.unwrap();
-        dbg!(resp.text().await.unwrap());
-    }
-}
 
 #[derive(Deserialize, Debug, Serialize)]
 struct BoxScore {

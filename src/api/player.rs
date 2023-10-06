@@ -2,6 +2,8 @@ use crate::api::id_maps::{PositionId, ProTeamId};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use super::id_maps::StatId;
+
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize, Default, Clone, Hash)]
 pub struct PlayerId(i64);
 
@@ -9,7 +11,7 @@ pub struct PlayerId(i64);
 pub struct Player {
     pub active: bool,
     #[serde(rename = "defaultPositionId")]
-    pub default_position_id: u8,
+    pub default_position_id: PositionId,
     pub droppable: bool,
     #[serde(rename = "eligibleSlots")]
     pub eligible_slots: Vec<PositionId>,
@@ -35,7 +37,7 @@ pub struct Player {
 #[derive(Debug, Deserialize, Serialize, Default, Clone, PartialEq)]
 pub struct Stats {
     #[serde(rename = "appliedStats")]
-    pub applied_stats: HashMap<u32, f32>,
+    pub applied_stats: HashMap<StatId, f32>,
     #[serde(rename = "appliedTotal")]
     pub applied_total: f32,
     #[serde(rename = "externalId")]

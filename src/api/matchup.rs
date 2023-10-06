@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use super::{
     league::DraftDetail,
     player::{Player, PlayerId},
+    team::TeamId,
 };
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -21,9 +22,9 @@ pub struct MatchupResponse {
 }
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Matchup {
-    away: TeamMatchupPerformance,
-    home: TeamMatchupPerformance,
-    id: u16,
+    pub away: TeamMatchupPerformance,
+    pub home: TeamMatchupPerformance,
+    pub id: u16,
     #[serde(rename = "matchupPeriodId")]
     pub matchup_period_id: u8,
     pub winner: String,
@@ -40,7 +41,7 @@ pub struct TeamMatchupPerformance {
     #[serde(rename = "rosterForCurrentScoringPeriod")]
     pub roster_for_current_scoring_period: Option<Roster>,
     #[serde(rename = "teamId")]
-    pub team_id: FantasyTeamId,
+    pub team_id: TeamId,
     #[serde(rename = "totalPoints")]
     pub total_points: f32,
 }

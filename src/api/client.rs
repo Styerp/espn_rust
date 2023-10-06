@@ -8,6 +8,7 @@ use reqwest::{
 };
 const ESPN_FF_BASE_URL: &str = "https://fantasy.espn.com/apis/v3/games/ffl";
 
+#[derive(Clone)]
 pub struct EspnClient {
     pub client: Client,
     pub league_id: i32,
@@ -43,7 +44,7 @@ impl EspnClient {
     pub fn main_api_string(&self, season: i16) -> String {
         format!(
             "{}/{}/segments/0/leagues/{}",
-            self.base_url, season, self.league_id
+            &self.base_url, season, self.league_id
         )
     }
 

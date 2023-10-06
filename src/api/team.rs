@@ -2,12 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{
-    id_maps::PositionId,
-    league::DraftDetail,
-    members::MemberId,
-    player::{Player, PlayerId},
-};
+use super::{league::DraftDetail, members::MemberId, player::PlayerId};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TeamResponse {
@@ -69,8 +64,8 @@ pub struct Team {
 
 ///TODO: What can't you trade?
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct TradeBlock { 
-    pub players: Option<HashMap<PlayerId, String>>
+pub struct TradeBlock {
+    pub players: Option<HashMap<PlayerId, String>>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

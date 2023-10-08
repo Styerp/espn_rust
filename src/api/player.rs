@@ -30,7 +30,7 @@ pub struct Player {
     #[serde(rename = "proTeamId")]
     pub pro_team_id: ProTeamId,
     pub rankings: Option<HashMap<u8, Vec<Ranking>>>,
-    pub stats: Vec<Stats>,
+    pub stats: Option<Vec<Stats>>,
     #[serde(rename = "universeId")]
     pub universe_id: u32,
 }

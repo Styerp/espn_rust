@@ -11,13 +11,15 @@ static ESPN_S2: &str = "AEAE3uggnFrxe%2Fulf%2FN3Y5DZpkDwrPnG2zpRTd3z3m%2B7YJ2Fmu
 
 #[tokio::main]
 async fn main() {
-    let week = env::args().collect::<Vec<_>>().get(1).expect("A week value to be supplied").parse().expect("To be a number");
-    let teams = EspnClient::build(SWID, ESPN_S2, LEAGUE_ID)
-        .get_team_data(SEASON_ID)
-        .await;
-    let data = EspnClient::build(SWID, ESPN_S2, LEAGUE_ID)
-        .get_matchups_for_week(SEASON_ID, week, week)
-        .await;
+    let week = env::args()
+        .collect::<Vec<_>>()
+        .get(1)
+        .expect("A week value to be supplied")
+        .parse()
+        .expect("To be a number");
+    let client = EspnClient::build(SWID, ESPN_S2, LEAGUE_ID);
+    let teams = client.get_team_data(SEASON_ID).await;
+    let data = client.get_matchups_for_week(SEASON_ID, week, week).await;
 
     println!("============== WEEK {week} ==================");
     for box_score in data {
@@ -45,6 +47,7 @@ fn get_unknowns(roster: Roster, team: TeamId, team_data: &TeamResponse) {
             .player_pool_entry
             .player
             .stats
+            .expect("There are stats")
             .get(0)
             .expect("At least one")
             .clone();

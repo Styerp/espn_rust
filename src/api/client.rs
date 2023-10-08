@@ -41,14 +41,7 @@ impl EspnClient {
         }
     }
 
-    pub fn main_api_string(&self, season: i16) -> String {
-        format!(
-            "{}/{}/segments/0/leagues/{}",
-            &self.base_url, season, self.league_id
-        )
-    }
-
-    pub async fn get_league_data(self, season: i16) -> LeagueInfoResponse {
+    pub async fn get_league_data(&self, season: i16) -> LeagueInfoResponse {
         let req = self.client.get(format!(
             "{}/seasons/{}/segments/0/leagues/{}",
             &self.base_url, season, &self.league_id
@@ -61,7 +54,7 @@ impl EspnClient {
         data
     }
 
-    pub async fn get_league_settings(self, season: i16) -> LeagueSettingsResponse {
+    pub async fn get_league_settings(&self, season: i16) -> LeagueSettingsResponse {
         let req = self
             .client
             .get(format!(
@@ -77,7 +70,7 @@ impl EspnClient {
         data
     }
 
-    pub async fn get_team_data(self, season: i16) -> TeamResponse {
+    pub async fn get_team_data(&self, season: i16) -> TeamResponse {
         let req = self
             .client
             .get(format!(
@@ -94,7 +87,7 @@ impl EspnClient {
         data
     }
 
-    pub async fn get_matchups(self, season: i16) -> MatchupResponse {
+    pub async fn get_matchups(&self, season: i16) -> MatchupResponse {
         let req = self
             .client
             .get(format!(
@@ -111,7 +104,7 @@ impl EspnClient {
     }
 
     pub async fn get_matchups_for_week(
-        self,
+        &self,
         season: i16,
         matchup_period_id: u8,
         scoring_period_id: u8,

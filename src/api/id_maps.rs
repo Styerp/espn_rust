@@ -45,7 +45,7 @@ impl ProTeamId {
     pub fn to_name(&self) -> &'static str {
         &self.identifiers().name
     }
-pub     fn to_abbreviation(&self) -> &'static str {
+    pub fn to_abbreviation(&self) -> &'static str {
         &self.identifiers().abbreviation
     }
     pub fn identifiers(&self) -> &TeamIdentifiers {
@@ -139,8 +139,8 @@ static STAT_ID_MAP: phf::Map<&'static str, StatIdentifiers> = phf_map! {
     "24" => StatIdentifiers{name: "Rushing Yards", field_name: "rushing_yards"},
     "25" => StatIdentifiers{name: "Rushing Touchdowns", field_name: "rushing_touchdowns"},
     "26" => StatIdentifiers{name: "Rushing 2 Point Conversions", field_name:"rushing_two_point_conversions"},
-    "37" => StatIdentifiers {name: "100-199 Yard Rushing Game", field_name: "rushing_100_to_199_yards"},
-    "38" => StatIdentifiers {name: "200+ Yard Rushing Game", field_name: "rushing_over_200_yards"},
+    "37" => StatIdentifiers{name: "100-199 Yard Rushing Game", field_name: "rushing_100_to_199_yards"},
+    "38" => StatIdentifiers{name: "200+ Yard Rushing Game", field_name: "rushing_over_200_yards"},
     "42" => StatIdentifiers{name: "Receiving Yards", field_name:"receiving_yards"},
     "43" => StatIdentifiers{name: "Receiving Touchdowns", field_name: "receiving_touchdowns"},
     "44" => StatIdentifiers{name: "Receiving 2 Point Conversions", field_name: "receiving_two_point_conversions"},

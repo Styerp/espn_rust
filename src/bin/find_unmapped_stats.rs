@@ -1,4 +1,4 @@
-use bench_king::api::{
+use espn_fantasy_football::api::{
     client::EspnClient,
     matchup::Roster,
     team::{TeamId, TeamResponse},

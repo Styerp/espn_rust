@@ -1,4 +1,4 @@
-use bench_king::api::{client::EspnClient, team::Record};
+use espn_fantasy_football::api::client::EspnClient;
 use std::collections::HashMap;
 static LEAGUE_ID: i32 = 111368805;
 const SEASON_ID: i16 = 2023;
@@ -9,14 +9,14 @@ pub struct SimpleRecord {
     wins: u8,
     losses: u8,
     ties: u8,
+    points_for: f32,
+    points_against: f32,
 }
 
 #[tokio::main]
 async fn main() {
     let client = EspnClient::build(SWID, ESPN_S2, LEAGUE_ID);
-    let teams = EspnClient::build(SWID, ESPN_S2, LEAGUE_ID)
-        .get_team_data(SEASON_ID)
-        .await;
+    let teams = client.get_team_data(SEASON_ID).await;
     let matchups = client.get_matchups(SEASON_ID).await;
     let mut records = HashMap::new();
     for team in &teams.teams {
@@ -24,25 +24,38 @@ async fn main() {
             wins: 0,
             losses: 0,
             ties: 0,
+            points_for: 0.0,
+            points_against: 0.0,
         });
     }
     for matchup in matchups.schedule {
         let winner = matchup.winner;
         if winner == "HOME" {
-            records
-                .entry(matchup.home.team_id)
-                .and_modify(|x| x.wins += 1);
-            records
-                .entry(matchup.away.team_id)
-                .and_modify(|x| x.losses += 1);
-        } else if winner == "AWAY" {
-            records
-                .entry(matchup.away.team_id)
-                .and_modify(|x| x.wins += 1);
+            records.entry(matchup.home.team_id).and_modify(|x| {
+                x.wins += 1;
+                x.points_against += matchup.away.total_points;
+                x.points_for += matchup.home.total_points;
+            });
+            records.entry(matchup.away.team_id).and_modify(|x| {
+                x.losses += 1;
 
-            records
-                .entry(matchup.home.team_id)
-                .and_modify(|x| x.losses += 1);
+                x.points_against += matchup.home.total_points;
+                x.points_for += matchup.away.total_points;
+            });
+        } else if winner == "AWAY" {
+            records.entry(matchup.away.team_id).and_modify(|x| {
+                x.wins += 1;
+
+                x.points_against += matchup.home.total_points;
+                x.points_for += matchup.away.total_points;
+            });
+
+            records.entry(matchup.home.team_id).and_modify(|x| {
+                x.losses += 1;
+
+                x.points_against += matchup.away.total_points;
+                x.points_for += matchup.home.total_points;
+            });
         }
     }
     let mut standings = records
@@ -52,18 +65,20 @@ async fn main() {
             (team.name.clone(), y)
         })
         .collect::<Vec<_>>();
-    standings.sort_by_key(|a| a.1.losses);
+    standings.sort_by_key(|a| (a.1.wins, a.1.points_for as i32, a.1.points_against as i32));
+    standings.reverse();
     // for team in teams.teams {
     //     println!("{:?}", team.record)
     // }
     for (index, (team, record)) in standings.iter().enumerate() {
         println!(
-            "In {} place, team {} with a record of {}-{}-{}.",
+            "In {} place, team {} with a record of {}-{}-{}. Pts For: {}",
             index + 1,
             team,
             record.wins,
             record.losses,
-            record.ties
+            record.ties,
+            record.points_for as i32
         );
     }
 }

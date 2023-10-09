@@ -1,9 +1,8 @@
-use bench_king::api::{
+use espn_fantasy_football::api::{
     client::EspnClient,
     matchup::Roster,
-    team::{TeamId, TeamResponse}, id_maps::PositionId,
+    team::{TeamId, TeamResponse},
 };
-use std::{env, collections::HashMap};
 
 static LEAGUE_ID: i32 = 111368805;
 const SEASON_ID: i16 = 2023;
@@ -13,14 +12,10 @@ static ESPN_S2: &str = "AEAE3uggnFrxe%2Fulf%2FN3Y5DZpkDwrPnG2zpRTd3z3m%2B7YJ2Fmu
 #[tokio::main]
 async fn main() {
     let client = EspnClient::build(SWID, ESPN_S2, LEAGUE_ID);
-    let teams = client
-        .get_team_data(SEASON_ID)
-        .await;
+    let teams = client.get_team_data(SEASON_ID).await;
 
     for week in 1..=5 {
-        let data = client
-            .get_matchups_for_week(SEASON_ID, week, week)
-            .await;
+        let data = client.get_matchups_for_week(SEASON_ID, week, week).await;
 
         println!("============== WEEK {week} ==================");
         for box_score in data {

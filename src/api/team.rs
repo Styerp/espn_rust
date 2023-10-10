@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{league::DraftDetail, members::MemberId, player::PlayerId};
+use super::{id_maps::StatId, league::DraftDetail, members::MemberId, player::PlayerId};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TeamResponse {
@@ -59,7 +59,7 @@ pub struct Team {
     #[serde(rename = "transactionCounter")]
     pub transaction_counter: TransactionCounter,
     #[serde(rename = "valuesByStat")]
-    pub values_by_stat: HashMap<u64, f32>,
+    pub values_by_stat: HashMap<StatId, f32>,
 }
 
 ///TODO: What can't you trade?

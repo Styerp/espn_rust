@@ -1,6 +1,11 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use super::{
+    id_maps::{PositionId, StatId},
+    team::TeamId,
+};
+
 #[derive(Deserialize, Debug, Serialize)]
 pub struct LeagueInfoResponse {
     #[serde(rename = "gameId")]
@@ -20,7 +25,7 @@ pub struct LeagueInfoResponse {
 pub struct TeamInfo {
     #[serde(rename = "abbrev")]
     pub abbreviation: String,
-    pub id: i8,
+    pub id: TeamId,
     pub location: String,
     pub nickname: String,
     pub owners: Vec<String>,
@@ -87,9 +92,9 @@ pub struct LeagueSettings {
     #[serde(rename = "restrictionType")]
     pub restriction_type: String,
     #[serde(rename = "rosterSettings")]
-    roster_settings: RosterSettings,
+    pub roster_settings: RosterSettings,
     #[serde(rename = "scheduleSettings")]
-    schedule_settings: ScheduleSettings,
+    pub schedule_settings: ScheduleSettings,
     #[serde(rename = "scoringSettings")]
     pub scoring_settings: ScoringSettings,
     pub size: i8,
@@ -177,14 +182,16 @@ pub struct RosterSettings {
     pub is_using_undroppable_list: bool,
     #[serde(rename = "lineupLocktimeType")]
     pub lineup_locktime_type: String,
+    /// The number of players that can be active in a given position for the purposes of scoring
     #[serde(rename = "lineupSlotCounts")]
-    pub lineup_slot_counts: HashMap<u8, u8>,
+    pub lineup_slot_counts: HashMap<PositionId, i8>,
     #[serde(rename = "lineupSlotStatLimits")]
     pub lineup_slot_stat_limits: HashMap<u8, u8>,
     #[serde(rename = "moveLimit")]
     pub move_limit: i32,
+    /// The number of players of a given type that can be rostered at once
     #[serde(rename = "positionLimits")]
-    pub position_limits: HashMap<u8, i8>,
+    pub position_limits: HashMap<PositionId, i8>,
     #[serde(rename = "rosterLocktimeType")]
     pub roster_locktime_type: String,
     #[serde(rename = "universeIds")]
@@ -254,8 +261,10 @@ pub struct ScoringItems {
     #[serde(rename = "leagueTotal")]
     pub league_total: f32,
     pub points: f32,
+    #[serde(rename = "pointsOverrides")]
+    pub points_overrides: Option<HashMap<u32, f32>>,
     #[serde(rename = "statId")]
-    pub stat_id: i16,
+    pub stat_id: StatId,
 }
 
 #[derive(Deserialize, Debug, Serialize)]

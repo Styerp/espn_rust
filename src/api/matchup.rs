@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use super::{
+    id_maps::PositionId,
     league::DraftDetail,
     player::{Player, PlayerId},
     team::TeamId,
@@ -76,7 +77,7 @@ pub struct RosterSlot {
     #[serde(rename = "injuryStatus")]
     pub injury_status: Option<String>,
     #[serde(rename = "lineupSlotId")]
-    pub lineup_slot_id: u8,
+    pub lineup_slot_id: PositionId,
     #[serde(rename = "pendingTransactionIds")]
     pub pending_transaction_ids: Option<Vec<u64>>,
     #[serde(rename = "playerId")]

@@ -1,5 +1,5 @@
 use super::matchup::{Matchup, MatchupResponse};
-use super::team::TeamResponse;
+use super::team::{Team, TeamResponse};
 use crate::api::league::*;
 use reqwest::{
     cookie::Jar,
@@ -54,7 +54,7 @@ impl EspnClient {
         data
     }
 
-    pub async fn get_league_settings(&self, season: i16) -> LeagueSettingsResponse {
+    pub async fn get_league_settings(&self, season: i16) -> LeagueSettings {
         let req = self
             .client
             .get(format!(
@@ -67,10 +67,10 @@ impl EspnClient {
             .json::<LeagueSettingsResponse>()
             .await
             .expect("LeagueSettingsResponse Deserialization");
-        data
+        data.settings
     }
 
-    pub async fn get_team_data(&self, season: i16) -> TeamResponse {
+    pub async fn get_team_data(&self, season: i16) -> Vec<Team> {
         let req = self
             .client
             .get(format!(
@@ -84,7 +84,7 @@ impl EspnClient {
             .json::<TeamResponse>()
             .await
             .expect("TeamResponse Deserialization");
-        data
+        data.teams
     }
 
     pub async fn get_matchups(&self, season: i16) -> MatchupResponse {

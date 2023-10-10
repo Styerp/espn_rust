@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use super::id_maps::StatId;
 
-#[derive(Debug, Deserialize, Eq, PartialEq, Serialize, Default, Clone, Hash)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize, Default, Clone, Hash, Copy)]
 pub struct PlayerId(i64);
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]

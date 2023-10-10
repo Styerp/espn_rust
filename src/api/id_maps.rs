@@ -1,7 +1,7 @@
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize, Default, Clone, Eq, PartialEq, Hash)]
-pub struct PositionId(u64);
+pub struct PositionId(pub u64);
 impl PositionId {
     pub fn to_string(&self) -> &'static str {
         match POSITION_ID_MAP.get(&self.0.to_string()) {
@@ -128,7 +128,7 @@ pub struct StatIdentifiers {
 }
 
 // Adapted from https://github.com/mkreiser/ESPN-Fantasy-Football-API/blob/main/src/player-stats/player-stats.js
-// use `find_unmapped_stats` to locate stats to add from your league for a given week
+// use the `find_unmapped_stats` example to locate stats to add from your league for a given week
 static STAT_ID_MAP: phf::Map<&'static str, StatIdentifiers> = phf_map! {
     "3" => StatIdentifiers {name: "Passing Yards", field_name: "passing_yards"},
     "4" => StatIdentifiers {name: "Passing Touchdowns", field_name:"passing_touchdowns"},

@@ -108,5 +108,5 @@ pub struct PlayerPoolEntry {
     pub trade_locked: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize, Default, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Default, Clone, Copy, Eq, PartialEq)]
 pub struct FantasyTeamId(u8);

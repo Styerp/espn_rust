@@ -162,7 +162,7 @@ pub struct DraftStrategy {
 }
 
 /// A fantasy football team in the league
-#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Deserialize, Serialize, Clone,Copy, Eq, PartialEq, Hash)]
 pub struct TeamId(u8);
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

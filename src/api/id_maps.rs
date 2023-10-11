@@ -40,7 +40,7 @@ static POSITION_ID_MAP: phf::Map<&'static str, &'static str> = phf_map! {
 };
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone, Eq, PartialEq)]
-pub struct ProTeamId(i8);
+pub struct ProTeamId(pub i8);
 impl ProTeamId {
     pub fn to_name(&self) -> &'static str {
         &self.identifiers().name
@@ -101,7 +101,7 @@ static PRO_TEAM_ID_MAP: phf::Map<&'static str, TeamIdentifiers> = phf_map! {
 };
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone, Eq, PartialEq, Hash)]
-pub struct StatId(u64);
+pub struct StatId(pub u64);
 
 impl StatId {
     pub fn identifiers(&self) -> &StatIdentifiers {

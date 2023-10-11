@@ -163,7 +163,7 @@ pub struct DraftStrategy {
 
 /// A fantasy football team in the league
 #[derive(Debug, Deserialize, Serialize, Clone,Copy, Eq, PartialEq, Hash)]
-pub struct TeamId(u8);
+pub struct TeamId(pub u8);
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TransactionCounter {

@@ -55,20 +55,20 @@ pub struct CumulativeScore {
     pub wins: u8,
 }
 
-#[derive(Debug, Deserialize, Serialize, Default, Copy, Clone)]
+#[derive(Debug, Deserialize, Serialize, Copy, Clone)]
 pub struct ScoreByStat {
     ineligible: Option<bool>,
     rank: Option<u32>,
     result: Option<f32>,
     score: Option<f32>,
 }
-#[derive(Debug, Deserialize, Serialize, Default, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Roster {
     #[serde(rename = "appliedStatTotal")]
     pub applied_stat_total: f32,
     pub entries: Vec<RosterSlot>,
 }
-#[derive(Debug, Deserialize, Serialize, Default, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct RosterSlot {
     #[serde(rename = "acquisitionDate")]
     pub acquisition_date: Option<u64>,
@@ -87,7 +87,7 @@ pub struct RosterSlot {
     pub status: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Default, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct PlayerPoolEntry {
     #[serde(rename = "appliedStatTotal")]
     pub applied_stat_total: f32,
@@ -99,7 +99,7 @@ pub struct PlayerPoolEntry {
     #[serde(rename = "lineupLocked")]
     pub lineup_locked: bool,
     #[serde(rename = "onTeamId")]
-    pub on_team_id: FantasyTeamId,
+    pub on_team_id: TeamId,
     pub player: Player,
     #[serde(rename = "rosterLocked")]
     pub roster_locked: bool,
@@ -107,6 +107,3 @@ pub struct PlayerPoolEntry {
     #[serde(rename = "tradeLocked")]
     pub trade_locked: bool,
 }
-
-#[derive(Debug, Deserialize, Serialize, Default, Clone, Copy, Eq, PartialEq)]
-pub struct FantasyTeamId(u8);

@@ -1,6 +1,6 @@
 use super::matchup::{Matchup, MatchupResponse};
 use super::team::{Team, TeamResponse};
-use crate::free_agent::FreeAgentResponse;
+use crate::free_agent::{FreeAgent, FreeAgentResponse};
 use crate::league::*;
 use reqwest::{
     cookie::Jar,
@@ -43,17 +43,41 @@ impl EspnClient {
         }
     }
 
-    pub async fn get_league_data(&self, season: i16) -> LeagueInfoResponse {
-        let req = self.client.get(format!(
-            "{}/seasons/{}/segments/0/leagues/{}",
-            &self.base_url, season, &self.league_id
-        ));
+    pub async fn get_league_members(&self, season: i16) -> Vec<LeagueMember> {
+        let req = self
+            .client
+            .get(format!(
+                "{}/seasons/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[("view", "mTeam")]);
         let res = req.send().await.expect("LeagueInfoResponse");
         let data = res
-            .json::<LeagueInfoResponse>()
+            .json::<LeagueResponse>()
             .await
             .expect("LeagueInfoResponse Deserialization");
-        data
+        match data.members {
+            Some(m) => m,
+            None => panic!("No league members, but there should be"),
+        }
+    }
+    pub async fn get_league_status(&self, season: i16) -> LeagueStatus {
+        let req = self
+            .client
+            .get(format!(
+                "{}/seasons/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[("view", "mStatus")]);
+        let res = req.send().await.expect("LeagueInfoResponse");
+        let data = res
+            .json::<LeagueResponse>()
+            .await
+            .expect("LeagueInfoResponse Deserialization");
+        match data.status {
+            Some(s) => s,
+            None => panic!("No league status, but there should be"),
+        }
     }
 
     pub async fn get_league_settings(&self, season: i16) -> LeagueSettings {
@@ -66,10 +90,13 @@ impl EspnClient {
             .query(&[("view", "mSettings")]);
         let res = req.send().await.expect("LeagueSettingsResponse");
         let data = res
-            .json::<LeagueSettingsResponse>()
+            .json::<LeagueResponse>()
             .await
             .expect("LeagueSettingsResponse Deserialization");
-        data.settings
+        match data.settings {
+            Some(s) => s,
+            None => panic!("No league settings found, but there should be"),
+        }
     }
 
     pub async fn get_team_data(&self, season: i16) -> Vec<Team> {
@@ -89,7 +116,31 @@ impl EspnClient {
         data.teams
     }
 
-    pub async fn get_matchups(&self, season: i16) -> MatchupResponse {
+    pub async fn get_teams_at_week(&self, season: i16, scoring_period_id: u8) -> Vec<Team> {
+        let req = self
+            .client
+            .get(format!(
+                "{}/seasons/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[
+                ("view", "mTeam"),
+                ("view", "mRoster"),
+                ("scoringPeriodId", &scoring_period_id.to_string()),
+            ]);
+        let res = req.send().await.expect("Team ");
+
+        let data = res
+            .json::<TeamResponse>()
+            .await
+            .expect("TeamResponse Deserialization");
+        data.teams
+    }
+
+    /// Get data about all matchups for the season.
+    ///
+    /// Does not include rosters.
+    pub async fn get_matchups(&self, season: i16) -> Vec<Matchup> {
         let req = self
             .client
             .get(format!(
@@ -102,9 +153,12 @@ impl EspnClient {
             .json::<MatchupResponse>()
             .await
             .expect("MatchupResponse Deserialization");
-        data
+        data.schedule
     }
 
+    /// Get data about matchups for a given scoringPeriod and matchupPeriod. Includes rosters.
+    ///
+    /// To see what scoringPeriod and matchupPeriods are related, try at schedule_settings.matchup_periods from get_league_settings.
     pub async fn get_matchups_for_week(
         &self,
         season: i16,
@@ -169,7 +223,7 @@ impl EspnClient {
         season: i16,
         scoring_period_id: u8,
         limit: u8,
-    ) -> FreeAgentResponse {
+    ) -> Vec<FreeAgent> {
         let free_agent_header_value = json!(
         {
             "players": {
@@ -195,11 +249,7 @@ impl EspnClient {
             .header("x-fantasy-filter", free_agent_header_value.to_string());
         dbg!(&req);
         let res = req.send().await.expect("Free Agents");
-        let text_resp = res.text().await.unwrap();
-        let deser = &mut serde_json::Deserializer::from_str(&text_resp);
-        let data: FreeAgentResponse = serde_path_to_error::deserialize(deser).unwrap();
-        //let data = res.json::<FreeAgentResponse>().await.expect("JSON");
-        //dbg!(&data);
-        data
+        let data = res.json::<FreeAgentResponse>().await.expect("JSON");
+        data.players
     }
 }

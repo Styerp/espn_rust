@@ -46,7 +46,7 @@ pub struct Player {
 }
 #[derive(Debug, Deserialize, Serialize, Default, Clone, PartialEq)]
 pub struct Stats {
-    #[serde(rename="appliedAverage")]
+    #[serde(rename = "appliedAverage")]
     pub applied_average: Option<f32>,
     #[serde(rename = "appliedStats")]
     pub applied_stats: Option<HashMap<StatId, f32>>,

@@ -1,24 +1,26 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::members::MemberId;
+
 use super::{
     id_maps::{PositionId, StatId},
     team::TeamId,
 };
 
 #[derive(Deserialize, Debug, Serialize)]
-pub struct LeagueInfoResponse {
+pub struct LeagueResponse {
     #[serde(rename = "gameId")]
     pub game_id: u32,
     pub id: u128,
-    pub members: Vec<LeagueMember>,
+    pub members: Option<Vec<LeagueMember>>,
     #[serde(rename = "segmentId")]
     pub segment_id: i8,
     #[serde(rename = "scoringPeriodId")]
     pub scoring_period_id: i8,
-    pub settings: LeagueInfoSettings,
-    pub status: LeagueInfoStatus,
-    pub teams: Vec<TeamInfo>,
+    pub settings: Option<LeagueSettings>,
+    pub status: Option<LeagueStatus>,
+    pub teams: Option<Vec<TeamInfo>>,
 }
 
 #[derive(Deserialize, Debug, Serialize)]
@@ -32,43 +34,89 @@ pub struct TeamInfo {
 }
 
 #[derive(Deserialize, Debug, Serialize)]
-pub struct LeagueInfoStatus {
+pub struct LeagueStatus {
+    #[serde(rename = "activatedDate")]
+    pub activated_date: Option<u64>,
+    #[serde(rename = "createdAsLeagueType")]
+    pub created_as_league_type: Option<i8>,
+    #[serde(rename = "creationInfo")]
+    pub creation_info: Option<LeagueUpdateInfo>,
+    #[serde(rename = "currentLeagueType")]
+    pub current_league_type: Option<i8>,
     #[serde(rename = "currentMatchupPeriod")]
     pub current_matchup_period: i8,
+    #[serde(rename = "finalScoringPeriod")]
+    pub final_scoring_period: Option<i8>,
+    #[serde(rename = "firstScoringPeriod")]
+    pub first_scoring_period: Option<i8>,
     #[serde(rename = "isActive")]
     pub is_active: bool,
+    #[serde(rename = "isExpired")]
+    pub is_expired: Option<bool>,
+    #[serde(rename = "isFull")]
+    pub is_full: Option<bool>,
+    #[serde(rename = "isPlayoffMatchupEdited")]
+    pub is_playoff_matchup_edited: Option<bool>,
+    #[serde(rename = "isToBeDeleted")]
+    pub is_to_be_deleted: Option<bool>,
+    #[serde(rename = "isViewable")]
+    pub is_viewable: Option<bool>,
+    #[serde(rename = "isWaiverOrderEdited")]
+    pub is_waiver_order_edited: Option<bool>,
+    #[serde(rename = "lastUpdateInfo")]
+    pub last_update_info: Option<LeagueUpdateInfo>,
     #[serde(rename = "latestScoringPeriod")]
     pub latest_scoring_period: i8,
+    #[serde(rename = "previousSeasons")]
+    pub previous_seasons: Option<Vec<u16>>,
+    #[serde(rename = "standingsUpdateDate")]
+    pub standings_update_date: Option<u64>,
+    #[serde(rename = "teamsJoined")]
+    pub teams_joined: Option<i8>,
+    #[serde(rename = "transactionScoringPeriod")]
+    pub transaction_scoring_period: Option<i8>,
+    #[serde(rename = "waiverLastExecutionDate")]
+    pub waiver_last_execution_date: Option<u64>,
+    #[serde(rename = "waiverProcessStatus")]
+    pub waiver_process_status: Option<HashMap<String, i8>>,
 }
 
-#[derive(Deserialize, Debug, Serialize)]
-pub struct LeagueInfoSettings {
-    pub name: String,
+#[derive(Debug, Deserialize, Serialize)]
+pub struct LeagueUpdateInfo {
+    #[serde(rename = "clientAddress")]
+    pub client_address: Option<String>,
+    pub platform: String,
+    pub source: String,
+}
+#[derive(Debug, Deserialize, Serialize)]
+pub enum UpdateSource {
+    Member(MemberId),
+    Espn(String),
 }
 
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Deserialize, Debug, Serialize, Clone)]
 pub struct LeagueMember {
     #[serde(rename = "displayName")]
     pub display_name: String,
+    #[serde(rename = "firstName")]
+    pub first_name: String,
     pub id: String,
+    #[serde(rename = "lastName")]
+    pub last_name: String,
     #[serde(rename = "isLeagueManager")]
-    pub is_league_manager: bool,
+    pub is_league_manager: Option<bool>,
+    #[serde(rename = "notificationSettings")]
+    pub notification_settings: Vec<NotificationSetting>,
 }
 
-#[derive(Deserialize, Debug, Serialize)]
-pub struct LeagueSettingsResponse {
-    #[serde(rename = "draftDetail")]
-    pub draft_detail: DraftDetail,
-    #[serde(rename = "gameId")]
-    pub game_id: i32,
-    pub id: u128,
-    #[serde(rename = "segmentId")]
-    pub segment_id: i8,
-    #[serde(rename = "scoringPeriodId")]
-    pub scoring_period_id: i8,
-    pub settings: LeagueSettings,
-    pub status: LeagueSettingsStatus,
+#[derive(Deserialize, Debug, Serialize, Clone)]
+pub struct NotificationSetting {
+    pub enabled: bool,
+    pub id: String,
+    #[serde(rename = "type")]
+    pub notification_type: String,
 }
+
 #[derive(Deserialize, Debug, Serialize, Copy, Clone)]
 pub struct DraftDetail {
     pub drafted: bool,
@@ -278,48 +326,4 @@ pub struct TradeSettings {
     pub revision_hours: u16,
     #[serde(rename = "vetoVotesRequired")]
     pub veto_votes_required: i8,
-}
-
-#[derive(Deserialize, Debug, Serialize)]
-pub struct LeagueSettingsStatus {
-    #[serde(rename = "activatedDate")]
-    pub activated_date: u64,
-    #[serde(rename = "createdAsLeagueType")]
-    pub created_as_league_type: u8,
-    #[serde(rename = "currentLeagueType")]
-    pub current_league_type: u8,
-    #[serde(rename = "currentMatchupPeriod")]
-    pub current_matchup_period: u8,
-    #[serde(rename = "finalScoringPeriod")]
-    pub final_scoring_period: u8,
-    #[serde(rename = "firstScoringPeriod")]
-    pub first_scoring_period: u8,
-    #[serde(rename = "isActive")]
-    pub is_active: bool,
-    #[serde(rename = "isExpired")]
-    pub is_expired: bool,
-    #[serde(rename = "isFull")]
-    pub is_full: bool,
-    #[serde(rename = "isPlayoffMatchupEdited")]
-    pub is_playoff_matchup_edited: bool,
-    #[serde(rename = "isToBeDeleted")]
-    pub is_to_be_deleted: bool,
-    #[serde(rename = "isViewable")]
-    pub is_viewable: bool,
-    #[serde(rename = "isWaiverOrderEdited")]
-    pub is_waiver_order_edited: bool,
-    #[serde(rename = "latestScoringPeriod")]
-    pub latest_scoring_period: u8,
-    #[serde(rename = "previousSeasons")]
-    pub previous_seasons: Vec<u32>,
-    #[serde(rename = "standingsUpdateDate")]
-    pub standings_update_date: u64,
-    #[serde(rename = "teamsJoined")]
-    pub teams_joined: u8,
-    #[serde(rename = "transactionScoringPeriod")]
-    pub transaction_scoring_period: u8,
-    #[serde(rename = "waiverLastExecutionDate")]
-    pub waiver_last_execution_date: u64,
-    #[serde(rename = "waiverProcessStatus")]
-    pub waiver_process_status: HashMap<String, u8>,
 }

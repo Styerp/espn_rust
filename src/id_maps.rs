@@ -39,7 +39,7 @@ static POSITION_ID_MAP: phf::Map<&'static str, &'static str> = phf_map! {
   "24" => "Unknown" // TODO: Figure out what this is
 };
 
-#[derive(Debug, Deserialize, Serialize, Default, Clone, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Default, Clone, Eq, PartialEq, Hash)]
 pub struct ProTeamId(pub i8);
 impl ProTeamId {
     pub fn to_name(&self) -> &'static str {

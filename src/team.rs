@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 use serde::{Deserialize, Serialize};
 
@@ -162,8 +162,13 @@ pub struct DraftStrategy {
 }
 
 /// A fantasy football team in the league
-#[derive(Debug, Deserialize, Serialize, Clone,Copy, Eq, PartialEq, Hash)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct TeamId(pub u8);
+impl fmt::Display for TeamId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TransactionCounter {

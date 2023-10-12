@@ -1,11 +1,13 @@
 use super::matchup::{Matchup, MatchupResponse};
 use super::team::{Team, TeamResponse};
-use crate::api::league::*;
+use crate::free_agent::FreeAgentResponse;
+use crate::league::*;
 use reqwest::{
     cookie::Jar,
     header::{HeaderMap, COOKIE},
     Client,
 };
+use serde_json::json;
 const ESPN_FF_BASE_URL: &str = "https://fantasy.espn.com/apis/v3/games/ffl";
 
 #[derive(Clone)]
@@ -161,4 +163,43 @@ impl EspnClient {
     //         |x| x.matchup_period_id == matchup_period_id
     //     ).map(|x| x.to_owned()).collect::<Vec<_>>()
     // }
+
+    pub async fn get_free_agents_for_week(
+        &self,
+        season: i16,
+        scoring_period_id: u8,
+        limit: u8,
+    ) -> FreeAgentResponse {
+        let free_agent_header_value = json!(
+        {
+            "players": {
+            "filterStatus": {
+                "value": ["FREEAGENT","WAIVERS"]
+            },
+            "limit": limit,
+            "sortPercOwned": {
+                "sortAsc": false,
+                "sortPriority": 1
+            }
+        }});
+        let req = self
+            .client
+            .get(format!(
+                "{}/seasons/{}/segments/0/leagues/{}",
+                &self.base_url, season, &self.league_id
+            ))
+            .query(&[
+                ("scoringPeriodId", scoring_period_id.to_string().as_str()),
+                ("view", "kona_player_info"),
+            ])
+            .header("x-fantasy-filter", free_agent_header_value.to_string());
+        dbg!(&req);
+        let res = req.send().await.expect("Free Agents");
+        let text_resp = res.text().await.unwrap();
+        let deser = &mut serde_json::Deserializer::from_str(&text_resp);
+        let data: FreeAgentResponse = serde_path_to_error::deserialize(deser).unwrap();
+        //let data = res.json::<FreeAgentResponse>().await.expect("JSON");
+        //dbg!(&data);
+        data
+    }
 }

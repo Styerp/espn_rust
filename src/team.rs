@@ -2,8 +2,6 @@ use std::{collections::HashMap, fmt};
 
 use serde::{Deserialize, Serialize};
 
-use crate::client::EspnClient;
-
 use super::{id_maps::StatId, league::DraftDetail, members::MemberId, player::PlayerId};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -166,17 +164,9 @@ pub struct DraftStrategy {
 /// A fantasy football team in the league
 #[derive(Debug, Deserialize, Serialize, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct TeamId(pub u8);
-impl TeamId {
-    pub async fn get_details(&self, client: &EspnClient, season: i16) -> Team {
-       match client.get_team_data(season).await.iter().find(|x| &x.id == self) {
-        Some(t)=> t.clone(),
-        None => panic!("No data for team")
-       }
-    }
-}
 impl fmt::Display for TeamId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "TeamId({})", self.0)
     }
 }
 

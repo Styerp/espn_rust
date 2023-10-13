@@ -2,6 +2,8 @@ use super::matchup::{Matchup, MatchupResponse};
 use super::team::{Team, TeamResponse};
 use crate::free_agent::{FreeAgent, FreeAgentResponse};
 use crate::league::*;
+use crate::members::MemberId;
+use crate::team::TeamId;
 use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache, HttpCacheOptions};
 use reqwest::{
     cookie::Jar,
@@ -10,13 +12,16 @@ use reqwest::{
 };
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use serde_json::json;
+use std::cell::RefCell;
+use std::collections::HashMap;
 const ESPN_FF_BASE_URL: &str = "https://fantasy.espn.com/apis/v3/games/ffl";
 
-#[derive(Clone)]
 pub struct EspnClient {
     pub client: ClientWithMiddleware,
     pub league_id: i32,
     pub base_url: &'static str,
+    teams: RefCell<HashMap<u16, HashMap<TeamId, Team>>>,
+    members: RefCell<HashMap<u16, HashMap<MemberId, LeagueMember>>>,
 }
 
 impl EspnClient {
@@ -48,10 +53,12 @@ impl EspnClient {
             client,
             league_id,
             base_url: ESPN_FF_BASE_URL,
+            teams: RefCell::new(HashMap::new()),
+            members: RefCell::new(HashMap::new()),
         }
     }
 
-    pub async fn get_league_members(&self, season: i16) -> Vec<LeagueMember> {
+    pub async fn get_league_members(&self, season: u16) -> Vec<LeagueMember> {
         let req = self
             .client
             .get(format!(
@@ -69,7 +76,7 @@ impl EspnClient {
             None => panic!("No league members, but there should be"),
         }
     }
-    pub async fn get_league_status(&self, season: i16) -> LeagueStatus {
+    pub async fn get_league_status(&self, season: u16) -> LeagueStatus {
         let req = self
             .client
             .get(format!(
@@ -88,7 +95,7 @@ impl EspnClient {
         }
     }
 
-    pub async fn get_league_settings(&self, season: i16) -> LeagueSettings {
+    pub async fn get_league_settings(&self, season: u16) -> LeagueSettings {
         let req = self
             .client
             .get(format!(
@@ -107,7 +114,7 @@ impl EspnClient {
         }
     }
 
-    pub async fn get_team_data(&self, season: i16) -> Vec<Team> {
+    pub async fn get_team_data(&self, season: u16) -> Vec<Team> {
         let req = self
             .client
             .get(format!(
@@ -124,7 +131,7 @@ impl EspnClient {
         data.teams
     }
 
-    pub async fn get_teams_at_week(&self, season: i16, scoring_period_id: u8) -> Vec<Team> {
+    pub async fn get_teams_at_week(&self, season: u16, scoring_period_id: u8) -> Vec<Team> {
         let req = self
             .client
             .get(format!(
@@ -148,7 +155,7 @@ impl EspnClient {
     /// Get data about all matchups for the season.
     ///
     /// Does not include rosters.
-    pub async fn get_matchups(&self, season: i16) -> Vec<Matchup> {
+    pub async fn get_matchups(&self, season: u16) -> Vec<Matchup> {
         let req = self
             .client
             .get(format!(
@@ -169,7 +176,7 @@ impl EspnClient {
     /// To see what scoringPeriod and matchupPeriods are related, try at schedule_settings.matchup_periods from get_league_settings.
     pub async fn get_matchups_for_week(
         &self,
-        season: i16,
+        season: u16,
         matchup_period_id: u8,
         scoring_period_id: u8,
     ) -> Vec<Matchup> {
@@ -259,5 +266,62 @@ impl EspnClient {
         let res = req.send().await.expect("Free Agents");
         let data = res.json::<FreeAgentResponse>().await.expect("JSON");
         data.players
+    }
+
+    /// Cached implementation to get overall team data for a season in the league.
+    pub async fn teams_for_season(&self, season: u16) -> HashMap<TeamId, Team> {
+        if self.teams.borrow().contains_key(&season) {
+            match &self.teams.borrow().get(&season) {
+                Some(t) => t.to_owned().clone(),
+                None => panic!("No teams for season {}. Check your inputs.", season),
+            }
+        } else {
+            let data = self.get_team_data(season).await;
+            let mapped = data
+                .iter()
+                .map(|f| (f.id, f.clone()))
+                .collect::<HashMap<TeamId, Team>>();
+            self.teams
+                .borrow_mut()
+                .entry(season)
+                .or_insert(mapped.clone());
+            mapped
+        }
+    }
+
+    /// Cache access to a specific team in the league for a given season.
+    pub async fn team_for_season(&self, team: &TeamId, season: u16) -> Team {
+        match self.teams_for_season(season).await.get(team) {
+            Some(t) => t.clone(),
+            None => panic!("No team {} for season {}", team, season)
+        }
+    }
+
+    /// Cache implementation for members of the league for a season.
+    pub async fn members_for_season(&self, season: u16) -> HashMap<MemberId, LeagueMember> {
+        if self.members.borrow().contains_key(&season) {
+            match &self
+                .members
+                .borrow()
+                .get(&season)
+            {
+                Some(t) => t.to_owned().clone(),
+                None => panic!(
+                    "No members for season {}. Check your inputs.",
+                    season
+                ),
+            }
+        } else {
+            let data = self.get_league_members(season).await;
+            let mapped = data
+                .iter()
+                .map(|f| (f.id.clone(), f.clone()))
+                .collect::<HashMap<MemberId, LeagueMember>>();
+            self.members
+                .borrow_mut()
+                .entry(season)
+                .or_insert(mapped.clone());
+            mapped
+        }
     }
 }

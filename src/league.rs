@@ -100,7 +100,7 @@ pub struct LeagueMember {
     pub display_name: String,
     #[serde(rename = "firstName")]
     pub first_name: String,
-    pub id: String,
+    pub id: MemberId,
     #[serde(rename = "lastName")]
     pub last_name: String,
     #[serde(rename = "isLeagueManager")]

@@ -1,4 +1,4 @@
-use espn_fantasy_football::api::{
+use espn_fantasy_football::{
     client::EspnClient,
     matchup::Roster,
     team::{TeamId, Team},
@@ -23,7 +23,7 @@ struct Args {
     )]
     league: i32,
     #[arg(short, long, long_help = "The year of the season.")]
-    season: i16,
+    season: u16,
     #[arg(short, long, long_help = "The week of the season")]
     week: u8,
     #[arg(
@@ -100,7 +100,7 @@ fn get_unknowns(roster: Roster, team: TeamId, team_data: &Vec<Team>) {
             .expect("At least one")
             .clone();
 
-        for val in stat.applied_stats {
+        for val in stat.applied_stats.unwrap() {
             if val.0.to_name() == "Unknown" && val.1 > 0.99 {
                 println!(
                     "Team {:?} Player {} Stat Number {:?} Value {}",

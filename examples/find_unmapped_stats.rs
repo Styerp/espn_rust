@@ -1,7 +1,7 @@
 use espn_fantasy_football::{
     client::EspnClient,
     matchup::Roster,
-    team::{TeamId, Team},
+    team::{Team, TeamId},
 };
 
 use clap::Parser;
@@ -66,23 +66,23 @@ async fn main() {
         }
     } else {
         let data = client
-                .get_matchups_for_week(cli_args.season, cli_args.week, cli_args.week)
-                .await;
+            .get_matchups_for_week(cli_args.season, cli_args.week, cli_args.week)
+            .await;
 
-            println!("============== WEEK {week} ==================");
-            for box_score in data {
-                get_unknowns(
-                    box_score.away.roster_for_current_scoring_period.unwrap(),
-                    box_score.away.team_id,
-                    &teams,
-                );
-                get_unknowns(
-                    box_score.home.roster_for_current_scoring_period.unwrap(),
-                    box_score.home.team_id,
-                    &teams,
-                );
-            }
-    } 
+        println!("============== WEEK {week} ==================");
+        for box_score in data {
+            get_unknowns(
+                box_score.away.roster_for_current_scoring_period.unwrap(),
+                box_score.away.team_id,
+                &teams,
+            );
+            get_unknowns(
+                box_score.home.roster_for_current_scoring_period.unwrap(),
+                box_score.home.team_id,
+                &teams,
+            );
+        }
+    }
 }
 fn get_unknowns(roster: Roster, team: TeamId, team_data: &Vec<Team>) {
     let filt = team_data

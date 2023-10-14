@@ -25,17 +25,26 @@ pub struct EspnClient {
 }
 
 impl EspnClient {
-    pub fn build(swid: &str, espn_s2: &str, league_id: i32) -> EspnClient {
+    /// Build the EspnClient, with SWID and ESPN_S2 cookies and headers, if supplied.
+    ///
+    /// # Arguments
+    ///
+    /// * league_id - The id of the league
+    /// * swid - The ESPN SWID Cookie Value
+    /// * espn_s2 - the ESPN ESPN_S2 Cookie Value
+    pub fn build(league_id: i32, swid: &str, espn_s2: &str) -> EspnClient {
         let mut headers = HeaderMap::new();
-        headers.insert(COOKIE, format!("SWID={swid}").parse().unwrap());
-        headers.insert(COOKIE, format!("espn_s2={espn_s2}").parse().unwrap());
         let cookie_store = Jar::default();
-        cookie_store.add_cookie_str(
-            format!("SWID={swid}; espn_s2={espn_s2}").as_str(),
-            &ESPN_FF_BASE_URL.parse().unwrap(),
-        );
+        if swid != "" && espn_s2 != "" {
+            headers.insert(COOKIE, format!("SWID={swid}").parse().unwrap());
+            headers.insert(COOKIE, format!("espn_s2={espn_s2}").parse().unwrap());
+            cookie_store.add_cookie_str(
+                format!("SWID={swid}; espn_s2={espn_s2}").as_str(),
+                &ESPN_FF_BASE_URL.parse().unwrap(),
+            );
+        }
         let client_builder = Client::builder()
-            .default_headers(headers.clone())
+            .default_headers(headers)
             .cookie_store(true)
             .cookie_provider(cookie_store.into())
             .build();
@@ -222,9 +231,7 @@ impl EspnClient {
     //             ("seasonId", season.to_string().as_str()),
     //             ("view", "mMatchupScore"),
     //             ("view", "mScoreboard"),
-    //             //("view", "mSettings"),
     //             ("view", "mTopPerformers"),
-    //             //("view", "mTeam"),
     //         ]);
     //     let res = req.send().await.expect("Historic Data");
     //     let data = res.json::<Vec<MatchupResponse>>().await.expect("JSON");
@@ -293,23 +300,16 @@ impl EspnClient {
     pub async fn team_for_season(&self, team: &TeamId, season: u16) -> Team {
         match self.teams_for_season(season).await.get(team) {
             Some(t) => t.clone(),
-            None => panic!("No team {} for season {}", team, season)
+            None => panic!("No team {} for season {}", team, season),
         }
     }
 
     /// Cache implementation for members of the league for a season.
     pub async fn members_for_season(&self, season: u16) -> HashMap<MemberId, LeagueMember> {
         if self.members.borrow().contains_key(&season) {
-            match &self
-                .members
-                .borrow()
-                .get(&season)
-            {
+            match &self.members.borrow().get(&season) {
                 Some(t) => t.to_owned().clone(),
-                None => panic!(
-                    "No members for season {}. Check your inputs.",
-                    season
-                ),
+                None => panic!("No members for season {}. Check your inputs.", season),
             }
         } else {
             let data = self.get_league_members(season).await;

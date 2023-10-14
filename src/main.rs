@@ -6,12 +6,8 @@ async fn main() {
     let swid = env::var("SWID").unwrap();
     let espn_s2 = env::var("ESPN_S2").unwrap();
     let league_id = env::var("ESPN_LEAGUE_ID").unwrap().parse::<i32>().unwrap();
-    let client = EspnClient::build(&swid, &espn_s2, league_id);
+    let client = EspnClient::build( league_id, &swid, &espn_s2);
 
-    let status = client.get_league_status(2023).await;
-    let members = client.get_league_members(2023).await;
-    let settings = client.get_league_settings(2023).await;
-    dbg!(status);
-    dbg!(members);
-    dbg!(settings);
+    let data = client.get_league_members(2023).await;
+    dbg!(data);
 }

@@ -41,7 +41,7 @@ async fn main() {
     let swid = cli_args.swid.unwrap();
     let espn_s2 = cli_args.espn_s2.unwrap();
     let league_id = cli_args.league;
-    let client = EspnClient::build(swid.as_str(), espn_s2.as_str(), league_id);
+    let client = EspnClient::build(league_id, swid.as_str(), espn_s2.as_str());
     let teams = client.get_team_data(cli_args.season).await;
 
     if cli_args.comprehensive {

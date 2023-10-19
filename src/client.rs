@@ -30,8 +30,8 @@ impl EspnClient {
     /// # Arguments
     ///
     /// * league_id - The id of the league
-    /// * swid - The ESPN SWID Cookie Value
-    /// * espn_s2 - the ESPN ESPN_S2 Cookie Value
+    /// * swid - The ESPN SWID Cookie Value; pass an empty string if not a private league.
+    /// * espn_s2 - the ESPN ESPN_S2 Cookie Value; pass an empty string if not a private league.
     pub fn build(league_id: i32, swid: &str, espn_s2: &str) -> EspnClient {
         let mut headers = HeaderMap::new();
         let cookie_store = Jar::default();

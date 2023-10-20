@@ -52,14 +52,16 @@ async fn main() {
 
             println!("============== WEEK {week} ==================");
             for box_score in data {
+                let away = box_score.away.unwrap();
+                let home = box_score.home.unwrap();
                 get_unknowns(
-                    box_score.away.roster_for_current_scoring_period.unwrap(),
-                    box_score.away.team_id,
+                    away.roster_for_current_scoring_period.unwrap(),
+                    away.team_id,
                     &teams,
                 );
                 get_unknowns(
-                    box_score.home.roster_for_current_scoring_period.unwrap(),
-                    box_score.home.team_id,
+                    home.roster_for_current_scoring_period.unwrap(),
+                    home.team_id,
                     &teams,
                 );
             }
@@ -71,14 +73,17 @@ async fn main() {
 
         println!("============== WEEK {week} ==================");
         for box_score in data {
+            let away = box_score.away.unwrap();
+            let home = box_score.home.unwrap();
+
             get_unknowns(
-                box_score.away.roster_for_current_scoring_period.unwrap(),
-                box_score.away.team_id,
+                away.roster_for_current_scoring_period.unwrap(),
+                away.team_id,
                 &teams,
             );
             get_unknowns(
-                box_score.home.roster_for_current_scoring_period.unwrap(),
-                box_score.home.team_id,
+                home.roster_for_current_scoring_period.unwrap(),
+                home.team_id,
                 &teams,
             );
         }

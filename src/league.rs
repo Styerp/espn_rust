@@ -30,7 +30,7 @@ pub struct TeamInfo {
     pub id: TeamId,
     pub location: String,
     pub nickname: String,
-    pub owners: Vec<String>,
+    pub owners: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Debug, Serialize)]

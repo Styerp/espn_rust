@@ -5,6 +5,7 @@ use crate::league::*;
 use crate::members::MemberId;
 use crate::team::TeamId;
 use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache, HttpCacheOptions};
+use reqwest::StatusCode;
 use reqwest::{
     cookie::Jar,
     header::{HeaderMap, COOKIE},
@@ -67,7 +68,7 @@ impl EspnClient {
         }
     }
 
-    pub async fn get_league_members(&self, season: u16) -> Vec<LeagueMember> {
+    pub async fn get_league_members(&self, season: u16) -> Result<Vec<LeagueMember>, String> {
         let req = self
             .client
             .get(format!(
@@ -76,14 +77,30 @@ impl EspnClient {
             ))
             .query(&[("view", "mTeam")]);
         let res = req.send().await.expect("LeagueInfoResponse");
-        let data = res
-            .json::<LeagueResponse>()
-            .await
-            .expect("LeagueInfoResponse Deserialization");
-        match data.members {
-            Some(m) => m,
-            None => panic!("No league members, but there should be"),
-        }
+        let result = match res.status() {
+            StatusCode::UNAUTHORIZED => Err("401".to_string()),
+            StatusCode::OK => {
+                let data = match res.json::<LeagueResponse>().await {
+                    Ok(f) => f,
+                    Err(e) => {
+                        return Err(format!(
+                            "LeagueInfoResponse Deserialization Error; Ignoring. {}",
+                            e
+                        ))
+                    }
+                };
+                match data.members {
+                    Some(m) => Ok(m),
+                    None => return Err("No league members, but there should be".to_string()),
+                }
+            }
+            StatusCode::NOT_FOUND => Err("404".to_string()),
+            _ => {
+                dbg!(res);
+                Err("Unknown Error".to_string())
+            }
+        };
+        result
     }
     pub async fn get_league_status(&self, season: u16) -> LeagueStatus {
         let req = self
@@ -312,7 +329,10 @@ impl EspnClient {
                 None => panic!("No members for season {}. Check your inputs.", season),
             }
         } else {
-            let data = self.get_league_members(season).await;
+            let data = match self.get_league_members(season).await {
+                Ok(f) => f,
+                Err(g) => panic!("{}", g),
+            };
             let mapped = data
                 .iter()
                 .map(|f| (f.id.clone(), f.clone()))

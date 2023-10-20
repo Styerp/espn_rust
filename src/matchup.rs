@@ -23,8 +23,8 @@ pub struct MatchupResponse {
 }
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Matchup {
-    pub away: TeamMatchupPerformance,
-    pub home: TeamMatchupPerformance,
+    pub away: Option<TeamMatchupPerformance>,
+    pub home: Option<TeamMatchupPerformance>,
     pub id: u16,
     #[serde(rename = "matchupPeriodId")]
     pub matchup_period_id: u8,
@@ -34,7 +34,7 @@ pub struct Matchup {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TeamMatchupPerformance {
     #[serde(rename = "cumulativeScore")]
-    pub cumulative_score: CumulativeScore,
+    pub cumulative_score: Option<CumulativeScore>,
     #[serde(rename = "gamesPlayed")]
     pub games_played: i32,
     #[serde(rename = "pointsByScoringPeriod")]

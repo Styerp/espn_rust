@@ -7,7 +7,10 @@ use crate::{client::EspnClient, league::LeagueMember};
 pub struct MemberId(pub String);
 impl MemberId {
     pub async fn to_details(&self, client: EspnClient, season: u16) -> LeagueMember {
-        let data = client.get_league_members(season).await;
+        let data = match client.get_league_members(season).await {
+            Ok(f) => f,
+            Err(e) => panic!("{}", e),
+        };
         match data.iter().find(|x| &x.id == self) {
             Some(s) => s.clone(),
             None => panic!("Wrong league?"),

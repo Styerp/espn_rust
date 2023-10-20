@@ -27,17 +27,17 @@ pub struct Team {
     #[serde(rename = "draftDayProjectedRank")]
     pub draft_day_projected_rank: u8,
     #[serde(rename = "draftStrategy")]
-    pub draft_strategy: DraftStrategy,
+    pub draft_strategy: Option<DraftStrategy>,
     pub id: TeamId,
     #[serde(rename = "isActive")]
     pub is_active: bool,
     pub location: String,
-    pub logo: String,
+    pub logo: Option<String>,
     #[serde(rename = "logoType")]
-    pub logo_type: String,
+    pub logo_type: Option<String>,
     pub name: String,
     pub nickname: String,
-    pub owners: Vec<MemberId>,
+    pub owners: Option<Vec<MemberId>>,
     #[serde(rename = "pendingTransactions")]
     pub pending_transactions: Option<Vec<PendingTransaction>>,
     #[serde(rename = "playoffSeed")]
@@ -48,7 +48,7 @@ pub struct Team {
     #[serde(rename = "pointsDelta")]
     pub points_delta: f32,
     #[serde(rename = "primaryOwner")]
-    pub primary_owner: MemberId,
+    pub primary_owner: Option<MemberId>,
     #[serde(rename = "rankCalculatedFinal")]
     pub rank_calculated_final: u8,
     #[serde(rename = "rankFinal")]
@@ -59,7 +59,7 @@ pub struct Team {
     #[serde(rename = "transactionCounter")]
     pub transaction_counter: TransactionCounter,
     #[serde(rename = "valuesByStat")]
-    pub values_by_stat: HashMap<StatId, f32>,
+    pub values_by_stat: Option<HashMap<StatId, f32>>,
 }
 
 ///TODO: What can't you trade?

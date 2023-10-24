@@ -65,7 +65,7 @@ pub struct ScoreByStat {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Roster {
     #[serde(rename = "appliedStatTotal")]
-    pub applied_stat_total: f32,
+    pub applied_stat_total: Option<f32>,
     pub entries: Vec<RosterSlot>,
 }
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -90,12 +90,12 @@ pub struct RosterSlot {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct PlayerPoolEntry {
     #[serde(rename = "appliedStatTotal")]
-    pub applied_stat_total: f32,
+    pub applied_stat_total: Option<f32>,
     pub id: PlayerId,
     #[serde(rename = "keeperValue")]
-    pub keeper_value: u8,
+    pub keeper_value: f32,
     #[serde(rename = "keeperValueFuture")]
-    pub keeper_value_future: u8,
+    pub keeper_value_future: f32,
     #[serde(rename = "lineupLocked")]
     pub lineup_locked: bool,
     #[serde(rename = "onTeamId")]

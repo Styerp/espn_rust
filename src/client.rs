@@ -1,24 +1,22 @@
 use super::matchup::{Matchup, MatchupResponse};
 use super::team::{Team, TeamResponse};
 use crate::free_agent::{FreeAgent, FreeAgentResponse};
-use crate::league::*;
+use crate::league::{LeagueResponse, LeagueMember, LeagueStatus, LeagueSettings};
 use crate::members::MemberId;
 use crate::team::TeamId;
-use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache, HttpCacheOptions};
 use reqwest::StatusCode;
 use reqwest::{
     cookie::Jar,
     header::{HeaderMap, COOKIE},
     Client,
 };
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use serde_json::json;
 use std::cell::RefCell;
 use std::collections::HashMap;
 const ESPN_FF_BASE_URL: &str = "https://fantasy.espn.com/apis/v3/games/ffl";
 
 pub struct EspnClient {
-    pub client: ClientWithMiddleware,
+    pub client: Client,
     pub league_id: i32,
     pub base_url: &'static str,
     teams: RefCell<HashMap<u16, HashMap<TeamId, Team>>>,
@@ -49,14 +47,18 @@ impl EspnClient {
             .cookie_store(true)
             .cookie_provider(cookie_store.into())
             .build();
+        // let client = match client_builder {
+        //     Ok(c) => ClientBuilder::new(c)
+        //         .with(Cache(HttpCache {
+        //             mode: CacheMode::Default,
+        //             manager: CACacheManager::default(),
+        //             options: HttpCacheOptions::default(),
+        //         }))
+        //         .build(),
+        //     Err(e) => panic!("Failed to construct client. Aborting. {e}"),
+        // };
         let client = match client_builder {
-            Ok(c) => ClientBuilder::new(c)
-                .with(Cache(HttpCache {
-                    mode: CacheMode::Default,
-                    manager: CACacheManager::default(),
-                    options: HttpCacheOptions::default(),
-                }))
-                .build(),
+            Ok(c) => c,
             Err(e) => panic!("Failed to construct client. Aborting. {e}"),
         };
         EspnClient {
